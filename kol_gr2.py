@@ -1,73 +1,92 @@
 #-*- encoding=utf-8 -*-
 
-#Write a library that contains a class that can represent any 2𝑥2 real matrice. 
-#Include two functions to calculate the sum and product of two matrices. 
-#Next, write a program that imports this library module and use it to perform calculations.
-#Examples:
-#
-# matrix_1 = Matrix(4,5,6,7)
-# matrix_2 = Matrix(2,2,2,1)
-#
-# matrix_3 = matrix_2.add(matrix_1)
-#
-#Try to expand your implementation as best as you can. 
-#Think of as many features as you can, and try implementing them.
-#(If you want you can expand implementation to NxN matrix.)
-#Make intelligent use of pythons syntactic sugar (overloading, iterators, generators, etc)
-#Most of all: CREATE GOOD, RELIABLE, READABLE CODE.
-#The goal of this task is for you to SHOW YOUR BEST python programming skills.
-#Impress everyone with your skills, show off with your code.
-#
-#When you are done upload this code to your github repository. 
-#The whole repository MUST be named "kol_gr2"! 
-#
-#Delete these comments before commit!
-#Good luck.
+class MatrixSizeMismatchException(Exception):
+ def __init__(self,size1,size2):
+  self.expected_size = size1
+  self.got_size = size2
+ def __str__(self):
+  return "Matrix size  mismatch - size "+ str(self.expected_size)+" needed, size "+ str(self.got_size)+" given."
 
-#assumes that given tuple represents square matrix
-class Matrix:
+# init assumes that given tuple represents square matrix
+class Matrix(object):
  def __init__(self,tple,n):
   self.matrix = tple
   self.size = n
+  self.i = 0
+
+ def __iter__(self):
+  return self.matrix[i]
   
  def __add__(self,mtrix):
   if self.size != mtrix.size:  
-   print "matrixes aren't equally big"
+   raise MatrixSizeMismatchException(self.size,mtrix.size)
   else:
-   sumMatrix = []
+   sum_matrix = []
    for i in range(len(self.matrix)):
-    tmpTple = []
+    tmp_tple = []
     for j in range(len(self.matrix[1])):
-     tmpTple.append(self.matrix[i][j])
-    sumMatrix.extend(tmpTple)
-   return Matrix(sumMatrix,self.size)
+     tmp_tple.append(self.matrix[i][j])
+    sum_matrix.append(tmp_tple)
+  return Matrix(sum_matrix,self.size)
 
-def printMatrix(mtrix):
- for i in range(mtrix.size):
-  row = ""
-  for j in range(mtrix.size):
-   row += str(mtrix.matrix[i][j]) 
-   row += " "
-  print row
- print "\n"
+ def __mul__(self,mtrix):
+  if self.size != mtrix.size:
+   raise MatrixSizeMismatchException(self.size,mtrix.size)
+  else:
+   mtrxmult = [[0]*self.size]*self.size
+   for i in range(self.size):
+    for j in range(self.size):
+     for k in range(self.size):
+      mtrxmult[i][j] +=  self.matrix[i][k] * mtrix.matrix[k][j]
+  return Matrix(mtrxmult,self.size)
 
+ def __str__(self):
+  mtrx = ""
+  for i in range(self.size):
+   row = ""
+   for j in range(self.size):
+    row += str(self.matrix[i][j]) + " "
+   row += "\n"
+   mtrx += row
+  return mtrx
 
+ def next(self):
+  if self.i < self.size:
+   i = self.i
+   self.i += 1
+   return self.matrix[i]
+  else:
+   raise StopIteration()
 
-print "matrix_1 = Matrix(((4,7),(2,5)), 2)"
-print "matrix_2 = Matrix(((2,2),(2,1)), 2)"
+if __name__ == '__main__':
 
-matrix_1 = Matrix(((4,7),(2,5)), 2)
-matrix_2 = Matrix(((2,2),(2,1)), 2)
+ print "matrix_1 = Matrix(((4,7),(2,5)), 2)"
+ print "matrix_2 = Matrix(((2,2),(2,1)), 2)"
 
-printMatrix(matrix_1)
-printMatrix(matrix_2)
+ matrix_1 = Matrix(((4,7),(2,5)), 2)
+ matrix_2 = Matrix(((2,2),(2,1)), 2)
 
-print "matrix_3 = matrix_1 + matrix_2"
-matrix_3 = matrix_1 + matrix_2
+ print matrix_1
+ print matrix_2
 
-print matrix_3
+ print "matrix_3 = matrix_1 + matrix_2\n"
+ matrix_3 = matrix_1 + matrix_2
 
-printMatrix(matrix_3)
+ print matrix_3
 
+ try:
+  matrix_4 = matrix_1 * matrix_2
+  print matrix_4
+ except MatrixSizeMismatchException as msme:
+  print msme
+ 
+ matrix_5 = Matrix(((1,2,3),(2,3,4),(5,6,7)),3)
 
+ try:
+  matrix_4 = matrix_1 * matrix_5
+  print matrix_4
+ except MatrixSizeMismatchException as msme:
+  print msme
 
+ for i in range(matrix_3.size):
+  print str(i+1) +". vector of matrix" + str(matrix_3.next())
